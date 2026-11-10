@@ -13,6 +13,14 @@ smoelenboek, en waarmee beheerders het smoelenboek als PDF downloaden.
 - Na het opslaan krijg je een persoonlijke, geheime bewerklink waarmee je je gegevens aanpast of
   jezelf verwijdert. Een eerder gekozen uitsnede kun je later nog aanpassen.
 
+<table>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/formulier-mobiel.webp" alt="Het ingevulde aanmeldformulier op een telefoon, met onderaan het live voorbeeld" width="100%"></td>
+    <td width="33%"><img src="docs/screenshots/bedankt-mobiel.webp" alt="De bedankpagina met het smoelenboekkaartje en de persoonlijke bewerklink" width="100%"></td>
+    <td width="33%"><img src="docs/screenshots/formulier-desktop.webp" alt="Het ingevulde aanmeldformulier op een computer, met het live voorbeeld ernaast" width="100%"></td>
+  </tr>
+</table>
+
 **Voor beheerders (`/beheer`, met persoonlijke login)**
 
 - Overzicht van alle aanmeldingen, zoeken en filteren
@@ -21,6 +29,15 @@ smoelenboek, en waarmee beheerders het smoelenboek als PDF downloaden.
 - Personen verwijderen
 - **Download PDF**: het smoelenboek in A4-formaat, 9 personen per pagina, alleen zichtbare personen
 - Beheerders toevoegen/verwijderen en eigen wachtwoord wijzigen
+
+<table>
+  <tr>
+    <td width="60%"><img src="docs/screenshots/beheer-desktop.webp" alt="Het beheeroverzicht met kaartjes per vrijwilliger, zichtbaarheidsschakelaars en de knop Download PDF" width="100%"></td>
+    <td width="40%"><img src="docs/screenshots/pdf.webp" alt="De eerste pagina van het smoelenboek als PDF" width="100%"></td>
+  </tr>
+</table>
+
+De voorbeeldpersonen in de screenshots zijn verzonnen en hebben getekende avatars.
 
 ## Techniek
 
@@ -46,7 +63,12 @@ vp install
 node scripts/admin.ts add jij@example.nl "Je naam"   # eerste beheerder aanmaken
 vp run dev                                           # http://localhost:3000
 vp check                                             # format, lint en types
+vp run screenshots                                   # screenshots in de README bijwerken
 ```
+
+`vp run screenshots` bouwt de app en start die met een tijdelijke database vol voorbeelddata
+(je eigen database blijft onaangeroerd), en gebruikt Google Chrome (`CHROME=...` voor een ander
+pad) en `pdftoppm` (pakket poppler-utils) voor de PDF-afbeelding.
 
 | Pagina               | Wat                      |
 | -------------------- | ------------------------ |
