@@ -1,5 +1,6 @@
 // Pure module (geen Nuxt auto-imports) zodat het ook vanuit scripts/admin.ts te gebruiken is.
 import { mkdirSync } from 'node:fs'
+import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 
@@ -34,7 +35,9 @@ const MIGRATIONS: string[] = [
 ]
 
 export function openDatabase(dataDir: string): DatabaseSync {
-  const dir = resolve(dataDir)
+  // Omgevingsvariabelen worden niet altijd door een shell gehaald (bijv. bij Alwaysdata),
+  // dus vervang een `~` aan het begin zelf door de home-map.
+  const dir = resolve(dataDir.replace(/^~(?=$|\/)/, homedir()))
   mkdirSync(dir, { recursive: true })
   const db = new DatabaseSync(join(dir, 'smoelenboek.sqlite'))
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;')

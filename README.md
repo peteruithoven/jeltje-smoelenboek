@@ -101,7 +101,7 @@ Het script gebruikt `NUXT_DATA_DIR` om de database te vinden (standaard `.data`)
    - _Environment_:
      ```
      NUXT_APP_SECRET=<uitkomst van openssl rand -base64 32>
-     NUXT_DATA_DIR=/home/<account>/smoelenboek-data
+     NUXT_DATA_DIR=/home/<account>/smoelenboek-data   # volledig pad
      ```
    - Zet onder _SSL_ "Force HTTPS" aan.
 
