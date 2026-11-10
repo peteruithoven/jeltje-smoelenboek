@@ -1,0 +1,112 @@
+# Smoelenboek Repair Café Jeltje
+
+Een kleine webapp waarmee vrijwilligers van Repair Café Jeltje zichzelf aanmelden voor het
+smoelenboek, en waarmee beheerders het smoelenboek als PDF downloaden.
+
+**Voor vrijwilligers (openbaar, mobielvriendelijk)**
+
+- Foto uploaden, uitsnijden, verschuiven, zoomen en draaien (ronde uitsnede)
+- Naam, rol(len) (reparateur / gastvrouw / gastheer / iets anders), wat je graag repareert en
+  één zin over jezelf (max. 150 tekens)
+- Live voorbeeld van hoe je in het smoelenboek komt
+- Toestemmingsvinkje (verplicht)
+- Na het opslaan krijg je een persoonlijke, geheime bewerklink waarmee je je gegevens aanpast of
+  jezelf verwijdert. Een eerder gekozen uitsnede kun je later nog aanpassen.
+
+**Voor beheerders (`/beheer`, met persoonlijke login)**
+
+- Overzicht van alle aanmeldingen, zoeken en filteren
+- Per persoon de zichtbaarheid in het smoelenboek aan/uit zetten
+- Nieuwe bewerklink maken voor iemand die de eigen link kwijt is (de oude link vervalt)
+- Personen verwijderen
+- **Download PDF**: het smoelenboek in A4-formaat, 9 personen per pagina, alleen zichtbare personen
+- Beheerders toevoegen/verwijderen en eigen wachtwoord wijzigen
+
+## Techniek
+
+- [Nuxt 4](https://nuxt.com) met [Vite+](https://viteplus.dev) en Tailwind CSS 4
+- Opslag: één SQLite-bestand via de ingebouwde `node:sqlite` van Node.js (geen native modules),
+  inclusief de foto's. Backup = dat ene bestand kopiëren.
+- Beheerderssessies met [nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils), wachtwoorden
+  gehasht met scrypt.
+- Bewerklinks: willekeurig token van 192 bits; in de database staat alleen de SHA-256-hash.
+- PDF wordt op de server gemaakt met [PDFKit](https://pdfkit.org), met de huisstijlfonts Blogger
+  Sans en ABeeZee.
+- Foto's worden in de browser verkleind en uitgesneden (vierkant, 800 px). Het verkleinde origineel
+  (max. 1600 px) wordt bewaard zodat iemand de uitsnede later kan aanpassen.
+- Privacy: geen externe requests (fonts staan lokaal), `noindex`, `no-referrer`, foto's en gegevens
+  alleen bereikbaar via de bewerklink of als beheerder.
+
+## Ontwikkelen
+
+Vereist Node.js 22.18 of nieuwer (24 LTS aanbevolen).
+
+```bash
+vp install
+node scripts/admin.ts add jij@example.nl "Je naam"   # eerste beheerder aanmaken
+vp run dev                                           # http://localhost:3000
+vp check                                             # format, lint en types
+```
+
+| Pagina               | Wat                      |
+| -------------------- | ------------------------ |
+| `/`                  | Aanmeldformulier         |
+| `/bewerken/<token>`  | Eigen gegevens aanpassen |
+| `/beheer`            | Beheer (login vereist)   |
+| `/beheer/beheerders` | Beheerders beheren       |
+
+### Beheerders via de commandline
+
+```bash
+node scripts/admin.ts add <email> [naam]   # vraagt om een wachtwoord (min. 10 tekens)
+node scripts/admin.ts password <email>
+node scripts/admin.ts remove <email>
+node scripts/admin.ts list
+```
+
+Het script gebruikt `NUXT_DATA_DIR` om de database te vinden (standaard `.data`).
+
+## Configuratie
+
+| Variabele         | Betekenis                                                          |
+| ----------------- | ------------------------------------------------------------------ |
+| `NUXT_APP_SECRET` | Verplicht in productie. Min. 32 tekens: `openssl rand -base64 32`. |
+| `NUXT_DATA_DIR`   | Map voor de SQLite-database. Standaard `.data`.                    |
+| `IP` / `PORT`     | Adres en poort om op te luisteren (Alwaysdata zet deze zelf).      |
+
+## Hosten op Alwaysdata
+
+1. **Node.js-versie**: kies onder _Environment → Node.js_ versie 24 (of nieuwer).
+2. **Code ophalen en bouwen** via SSH:
+
+   ```bash
+   git clone <repo-url> ~/smoelenboek
+   cd ~/smoelenboek
+   npx pnpm install --frozen-lockfile
+   npx pnpm build
+   mkdir -p ~/smoelenboek-data
+   NUXT_DATA_DIR=~/smoelenboek-data node scripts/admin.ts add jij@example.nl "Je naam"
+   ```
+
+3. **Site aanmaken** onder _Web → Sites → Add a site_:
+   - _Addresses_: bijv. `smoelenboek.repaircafejeltje.nl` (of een `*.alwaysdata.net`-adres)
+   - _Type_: **Node.js**
+   - _Command_: `node server.mjs`
+   - _Working directory_: `smoelenboek`
+   - _Environment_:
+     ```
+     NUXT_APP_SECRET=<uitkomst van openssl rand -base64 32>
+     NUXT_DATA_DIR=/home/<account>/smoelenboek-data
+     ```
+   - Zet onder _SSL_ "Force HTTPS" aan.
+
+   Alwaysdata geeft `IP` en `PORT` zelf mee; `server.mjs` zorgt dat de app daarop luistert.
+
+4. **Updaten**: `git pull && npx pnpm install --frozen-lockfile && npx pnpm build` en daarna de
+   site herstarten in het Alwaysdata-panel.
+
+**Backup**: Alwaysdata maakt dagelijks backups van je home-map, dus ook van
+`~/smoelenboek-data/smoelenboek.sqlite`. Een losse kopie maken kan veilig met
+`sqlite3 smoelenboek.sqlite ".backup kopie.sqlite"`.
+
+De database houdt de data buiten de code-map, zodat een nieuwe deploy nooit gegevens overschrijft.

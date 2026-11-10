@@ -1,0 +1,71 @@
+@import 'tailwindcss';
+@import '@fontsource/abeezee/400.css';
+@import '@fontsource/abeezee/400-italic.css';
+
+@font-face {
+  font-family: 'Blogger Sans';
+  src: url('/fonts/BloggerSans.woff') format('woff');
+  font-display: swap;
+}
+
+/* Huisstijl Repair Café Jeltje (repaircafejeltje.nl) */
+@theme {
+  --color-red: #fc4237;
+  --color-red-dark: #d92e24;
+  --color-blue: #7aaed5;
+  --color-blue-dark: #4f8dbd;
+  --color-brown: #663a2a;
+  --color-green: #5b9669;
+  --color-ink: #1f1f1d;
+  --color-muted: #5f5d59;
+  --color-paper: #f7f5f1;
+  --color-line: #e4e0d8;
+
+  --font-sans: 'ABeeZee', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Blogger Sans', 'ABeeZee', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    @apply bg-white text-ink antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-normal leading-tight;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-dark;
+  }
+}
+
+/* Componenten */
+@utility btn {
+  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 px-5 py-2.5 text-base font-bold transition select-none disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-red text-white hover:bg-red-dark;
+}
+@utility btn-secondary {
+  @apply btn border-2 border-ink/15 bg-white text-ink hover:border-ink/40;
+}
+@utility btn-ghost {
+  @apply btn px-3 text-muted hover:bg-paper hover:text-ink;
+}
+@utility btn-danger {
+  @apply btn border-2 border-red/40 bg-white text-red-dark hover:border-red hover:bg-red/5;
+}
+
+@utility field-label {
+  @apply mb-1.5 block font-display text-xl text-ink;
+}
+@utility field-hint {
+  @apply mb-2 text-sm text-muted;
+}
+@utility input {
+  @apply block w-full rounded-none border-2 border-line bg-white px-3.5 py-2.5 text-base text-ink transition placeholder:text-muted/60 focus:border-blue-dark focus:outline-none;
+}
+@utility label-tag {
+  @apply inline-block rounded-[4px] px-2.5 py-0.5 font-display text-white;
+}
