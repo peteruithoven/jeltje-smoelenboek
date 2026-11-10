@@ -40,9 +40,11 @@ export async function renderSmoelenboek(people: PdfPerson[]): Promise<Buffer> {
     asset('img/logo.png'),
   ])
 
-  const date = new Intl.DateTimeFormat('nl-NL', { month: 'long', year: 'numeric' }).format(
-    new Date(),
-  )
+  const date = new Intl.DateTimeFormat('nl-NL', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date())
 
   const doc = new PDFDocument({
     size: 'A4',
