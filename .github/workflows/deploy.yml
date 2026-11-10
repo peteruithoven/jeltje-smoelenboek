@@ -1,0 +1,73 @@
+# Bouwt en controleert de app bij elke push naar main, zet hem op Alwaysdata en herstart de site.
+#
+# Benodigde repository secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_SSH_KEY        private key van een aparte deploy-sleutel; de public key staat bij
+#                         Alwaysdata onder Remote access → SSH
+#   ALWAYSDATA_API_TOKEN  API-token uit het Alwaysdata-panel (Customer area → Profile → Tokens)
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Nooit twee deploys tegelijk; een nieuwe wacht tot de vorige klaar is.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SSH_HOST: ssh-jeltje-smoelenboek.alwaysdata.net
+  SSH_USER: jeltje-smoelenboek
+  # Host key van de server (`ssh-keyscan -t ed25519 ssh-jeltje-smoelenboek.alwaysdata.net`),
+  # gecontroleerd tegen een eerdere handmatige verbinding.
+  SSH_KNOWN_HOST: ssh-jeltje-smoelenboek.alwaysdata.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILFC808n0lKFAA1QsutTFWO+pNyuUo7I1FlCqLn60uO2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.18.0 # zelfde als devEngines in package.json
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Format, lint en types
+        run: pnpm exec vp check
+
+      - run: pnpm run build
+
+      - name: SSH instellen
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOST" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host smoelenboek
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+          EOF
+
+      - name: Uploaden en herstarten
+        env:
+          SKIP_BUILD: 1
+          ALWAYSDATA_API_TOKEN: ${{ secrets.ALWAYSDATA_API_TOKEN }}
+        run: sh scripts/deploy.sh

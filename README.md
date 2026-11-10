@@ -129,7 +129,32 @@ Het script gebruikt `NUXT_DATA_DIR` om de database te vinden (standaard `.data`)
 
    Alwaysdata geeft `IP` en `PORT` zelf mee; `server.mjs` zorgt dat de app daarop luistert.
 
-4. **Updaten**: `vp run deploy` en daarna de site herstarten in het Alwaysdata-panel.
+4. **Updaten**: gaat automatisch bij elke push naar `main` (zie hieronder). Handmatig kan ook met
+   `vp run deploy`; zet `ALWAYSDATA_API_TOKEN` om de site daarna automatisch te herstarten, anders
+   herstart je hem in het Alwaysdata-panel.
+
+### Automatisch deployen met GitHub Actions
+
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml) draait bij elke push naar `main`:
+installeren, `vp check`, bouwen, uploaden via SSH en de site herstarten via de Alwaysdata API. Faalt
+`vp check` of de build, dan wordt er niets gedeployed. Je kunt de workflow ook met de hand starten
+onder _Actions → Deploy → Run workflow_.
+
+Eenmalig instellen:
+
+1. **Deploy-sleutel**: maak een aparte SSH-sleutel zonder wachtwoord, alleen voor GitHub:
+   `ssh-keygen -t ed25519 -N "" -C github-actions-smoelenboek -f deploy_key`.
+   Zet `deploy_key.pub` bij Alwaysdata onder _Remote access → SSH/SFTP_ bij je SSH-gebruiker.
+2. **API-token**: maak in het Alwaysdata-panel een token aan onder _Customer area → Profile →
+   Tokens_ (beperk het tot dit account als dat kan).
+3. **GitHub secrets** (_Settings → Secrets and variables → Actions_), of met de `gh` CLI:
+   ```bash
+   gh secret set DEPLOY_SSH_KEY < deploy_key
+   gh secret set ALWAYSDATA_API_TOKEN
+   ```
+   Verwijder daarna de lokale `deploy_key`-bestanden.
+
+Wisselt de server ooit van host key, pas dan `SSH_KNOWN_HOST` in de workflow aan.
 
 **Backup**: Alwaysdata maakt dagelijks backups van je home-map, dus ook van
 `~/smoelenboek-data/smoelenboek.sqlite`. Een losse kopie maken kan veilig met
