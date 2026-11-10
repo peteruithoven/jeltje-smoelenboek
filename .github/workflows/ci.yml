@@ -1,0 +1,41 @@
+# Controleert de code bij elke pull request. Wordt ook door deploy.yml aangeroepen, zodat er
+# alleen gedeployed wordt als deze controles slagen.
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# Bij een nieuwe push naar dezelfde pull request vervalt de vorige run.
+# (Bij een aanroep vanuit deploy.yml is github.workflow "Deploy", dus dat zit elkaar niet in de weg.)
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Installeert Vite+, Node.js en pnpm (versie uit devEngines) en draait `vp install`,
+      # waarvan de postinstall `nuxt prepare` de `.nuxt`-types maakt die de checks nodig hebben.
+      - uses: voidzero-dev/setup-vp@v1.21.2
+        with:
+          node-version: '24'
+          cache: true
+
+      - name: Format, lint en types
+        run: vp check
+
+      # `vp check` controleert geen types in .vue-bestanden
+      - name: Types in Vue-bestanden
+        run: vp run typecheck
+
+      # `vp build` start gewone Vite; de app wordt door Nuxt gebouwd
+      - name: Bouwen
+        run: vp run build

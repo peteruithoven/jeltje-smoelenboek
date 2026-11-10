@@ -63,6 +63,7 @@ vp install
 node scripts/admin.ts add jij@example.nl "Je naam"   # eerste beheerder aanmaken
 vp run dev                                           # http://localhost:3000
 vp check                                             # format, lint en types
+vp run typecheck                                     # types in .vue-bestanden
 vp run screenshots                                   # screenshots in de README bijwerken
 ```
 
@@ -135,9 +136,12 @@ Het script gebruikt `NUXT_DATA_DIR` om de database te vinden (standaard `.data`)
 
 ### Automatisch deployen met GitHub Actions
 
-[.github/workflows/deploy.yml](.github/workflows/deploy.yml) draait bij elke push naar `main`:
-installeren, `vp check`, bouwen, uploaden via SSH en de site herstarten via de Alwaysdata API. Faalt
-`vp check` of de build, dan wordt er niets gedeployed. Je kunt de workflow ook met de hand starten
+[.github/workflows/ci.yml](.github/workflows/ci.yml) controleert elke pull request: `vp check`
+(format, lint en types), `vp run typecheck` (types in `.vue`-bestanden) en de build.
+
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml) draait bij elke push naar `main`: eerst
+dezelfde controles uit `ci.yml`, dan bouwen, uploaden via SSH en de site herstarten via de
+Alwaysdata API. Faalt een controle, dan wordt er niets gedeployed. Je kunt de workflow ook met de hand starten
 onder _Actions → Deploy → Run workflow_.
 
 Eenmalig instellen:

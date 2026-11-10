@@ -1,8 +1,9 @@
-# Bouwt en controleert de app bij elke push naar main, zet hem op Alwaysdata en herstart de site.
+# Bij elke push naar main: eerst de CI-controles (ci.yml), dan bouwen, op Alwaysdata zetten en de
+# site herstarten.
 #
 # Benodigde repository secrets (Settings → Secrets and variables → Actions):
 #   DEPLOY_SSH_KEY        private key van een aparte deploy-sleutel; de public key staat bij
-#                         Alwaysdata onder Remote access → SSH
+#                         Alwaysdata onder Remote access → SSH/SFTP
 #   ALWAYSDATA_API_TOKEN  API-token uit het Alwaysdata-panel (Customer area → Profile → Tokens)
 name: Deploy
 
@@ -27,27 +28,23 @@ env:
   SSH_KNOWN_HOST: ssh-jeltje-smoelenboek.alwaysdata.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILFC808n0lKFAA1QsutTFWO+pNyuUo7I1FlCqLn60uO2
 
 jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
   deploy:
+    needs: check
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: voidzero-dev/setup-vp@v1.21.2
         with:
-          version: 12.18.0 # zelfde als devEngines in package.json
+          node-version: '24'
+          cache: true
 
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Format, lint en types
-        run: pnpm exec vp check
-
-      - run: pnpm run build
+      - name: Bouwen
+        run: vp run build
 
       - name: SSH instellen
         env:
