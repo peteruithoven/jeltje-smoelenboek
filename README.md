@@ -77,20 +77,21 @@ Het script gebruikt `NUXT_DATA_DIR` om de database te vinden (standaard `.data`)
 ## Hosten op Alwaysdata
 
 1. **Node.js-versie**: kies onder _Environment → Node.js_ versie 24 (of nieuwer).
-2. **Code ophalen en bouwen** via SSH:
+2. **Bouwen en uploaden** vanaf je eigen computer. Er wordt niets geïnstalleerd of gebouwd op de
+   server (daar is te weinig ruimte/geheugen voor); alleen de build (~6 MB) gaat erheen. Stel eerst
+   een ssh-host in (bijv. `smoelenboek` in `~/.ssh/config`), dan:
 
    ```bash
-   git clone https://github.com/peteruithoven/jeltje-smoelenboek.git ~/smoelenboek
-   cd ~
-   npx -y pnpm@12.18.0 --dir smoelenboek install --frozen-lockfile
-   npx -y pnpm@12.18.0 --dir smoelenboek build
+   vp run deploy   # of: DEPLOY_HOST=... DEPLOY_DIR=... vp run deploy
+   ```
+
+   Eenmalig op de server de datamap en de eerste beheerder aanmaken:
+
+   ```bash
+   ssh smoelenboek
    mkdir -p ~/smoelenboek-data
    NUXT_DATA_DIR=~/smoelenboek-data node smoelenboek/scripts/admin.ts add jij@example.nl "Je naam"
    ```
-
-   Let op: start `npx` vanuit je home-map, niet vanuit de projectmap. npm weigert anders, omdat
-   `package.json` via `devEngines` pnpm voorschrijft. Gebruik dezelfde pnpm-versie als in
-   `devEngines` (nu 12.18.0), anders klopt de lockfile niet.
 
 3. **Site aanmaken** onder _Web → Sites → Add a site_:
    - _Addresses_: bijv. `smoelenboek.repaircafejeltje.nl` (of een `*.alwaysdata.net`-adres)
@@ -106,11 +107,7 @@ Het script gebruikt `NUXT_DATA_DIR` om de database te vinden (standaard `.data`)
 
    Alwaysdata geeft `IP` en `PORT` zelf mee; `server.mjs` zorgt dat de app daarop luistert.
 
-4. **Updaten**: daarna de site herstarten in het Alwaysdata-panel.
-
-   ```bash
-   ssh smoelenboek 'git -C smoelenboek pull && npx -y pnpm@12.18.0 --dir smoelenboek install --frozen-lockfile && npx -y pnpm@12.18.0 --dir smoelenboek build'
-   ```
+4. **Updaten**: `vp run deploy` en daarna de site herstarten in het Alwaysdata-panel.
 
 **Backup**: Alwaysdata maakt dagelijks backups van je home-map, dus ook van
 `~/smoelenboek-data/smoelenboek.sqlite`. Een losse kopie maken kan veilig met
