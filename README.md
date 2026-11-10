@@ -80,13 +80,17 @@ Het script gebruikt `NUXT_DATA_DIR` om de database te vinden (standaard `.data`)
 2. **Code ophalen en bouwen** via SSH:
 
    ```bash
-   git clone <repo-url> ~/smoelenboek
-   cd ~/smoelenboek
-   npx pnpm install --frozen-lockfile
-   npx pnpm build
+   git clone https://github.com/peteruithoven/jeltje-smoelenboek.git ~/smoelenboek
+   cd ~
+   npx -y pnpm@12.18.0 --dir smoelenboek install --frozen-lockfile
+   npx -y pnpm@12.18.0 --dir smoelenboek build
    mkdir -p ~/smoelenboek-data
-   NUXT_DATA_DIR=~/smoelenboek-data node scripts/admin.ts add jij@example.nl "Je naam"
+   NUXT_DATA_DIR=~/smoelenboek-data node smoelenboek/scripts/admin.ts add jij@example.nl "Je naam"
    ```
+
+   Let op: start `npx` vanuit je home-map, niet vanuit de projectmap. npm weigert anders, omdat
+   `package.json` via `devEngines` pnpm voorschrijft. Gebruik dezelfde pnpm-versie als in
+   `devEngines` (nu 12.18.0), anders klopt de lockfile niet.
 
 3. **Site aanmaken** onder _Web → Sites → Add a site_:
    - _Addresses_: bijv. `smoelenboek.repaircafejeltje.nl` (of een `*.alwaysdata.net`-adres)
@@ -102,8 +106,11 @@ Het script gebruikt `NUXT_DATA_DIR` om de database te vinden (standaard `.data`)
 
    Alwaysdata geeft `IP` en `PORT` zelf mee; `server.mjs` zorgt dat de app daarop luistert.
 
-4. **Updaten**: `git pull && npx pnpm install --frozen-lockfile && npx pnpm build` en daarna de
-   site herstarten in het Alwaysdata-panel.
+4. **Updaten**: daarna de site herstarten in het Alwaysdata-panel.
+
+   ```bash
+   ssh smoelenboek 'git -C smoelenboek pull && npx -y pnpm@12.18.0 --dir smoelenboek install --frozen-lockfile && npx -y pnpm@12.18.0 --dir smoelenboek build'
+   ```
 
 **Backup**: Alwaysdata maakt dagelijks backups van je home-map, dus ook van
 `~/smoelenboek-data/smoelenboek.sqlite`. Een losse kopie maken kan veilig met
