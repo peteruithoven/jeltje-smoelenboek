@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Uitnodigingslink voor een nieuwe beheerder, om te mailen of te delen (bijv. via Signal).
+// Uitnodigingslink voor een nieuwe beheerder, om te mailen of te delen (bijv. via Signal of e-mail).
 const props = defineProps<{ token: string; name: string; expiresAt: string }>()
 
 const url = computed(() => `${useRequestURL().origin}/uitnodiging/${props.token}`)
@@ -18,7 +18,6 @@ const text = computed(
       label="Uitnodigingslink"
       share-title="Uitnodiging beheer smoelenboek Repair Café Jeltje"
       :share-text="text"
-      mail-label="Mailen"
     />
     <p class="mt-2 text-xs text-muted">
       Geldig tot {{ formatDateTime(expiresAt) }} en maar één keer te gebruiken. Deze link wordt maar
