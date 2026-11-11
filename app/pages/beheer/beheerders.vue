@@ -14,20 +14,62 @@ const { data: admins, refresh } = await useFetch<Admin[]>('/api/admin/admins', {
   default: () => [],
 })
 
-const newAdmin = ref({ email: '', name: '', password: '' })
-const addError = ref('')
-const addSuccess = ref('')
-async function add() {
-  addError.value = ''
-  addSuccess.value = ''
+interface Invite {
+  id: number
+  name: string
+  createdBy: string | null
+  createdAt: string
+  expiresAt: string
+  expired: boolean
+}
+interface InviteLinkData {
+  id: number
+  token: string
+  expiresAt: string
+}
+
+const { data: invites, refresh: refreshInvites } = await useFetch<Invite[]>('/api/admin/invites', {
+  default: () => [],
+})
+
+const inviteName = ref('')
+const inviteError = ref('')
+/** De zojuist gemaakte uitnodiging, met link (die wordt maar één keer getoond) */
+const newInvite = ref<(InviteLinkData & { name: string }) | null>(null)
+async function invite() {
+  inviteError.value = ''
   try {
-    await $fetch('/api/admin/admins', { method: 'POST', body: newAdmin.value })
-    addSuccess.value = `${newAdmin.value.email} is toegevoegd. Geef het wachtwoord op een veilige manier door.`
-    newAdmin.value = { email: '', name: '', password: '' }
-    await refresh()
+    const result = await $fetch<InviteLinkData>('/api/admin/invites', {
+      method: 'POST',
+      body: { name: inviteName.value },
+    })
+    newInvite.value = { ...result, name: inviteName.value.trim() }
+    inviteName.value = ''
+    await refreshInvites()
   } catch (e) {
-    addError.value = errorMessage(e)
+    inviteError.value = errorMessage(e)
   }
+}
+
+/** Een opnieuw gemaakte link bij een bestaande uitnodiging */
+const renewedLink = ref<InviteLinkData | null>(null)
+async function renewInvite(id: number) {
+  const result = await $fetch<{ token: string; expiresAt: string }>(
+    `/api/admin/invites/${id}/token`,
+    { method: 'POST' },
+  )
+  if (newInvite.value?.id === id) newInvite.value = null
+  renewedLink.value = { id, ...result }
+  await refreshInvites()
+}
+
+const confirmRevoke = ref<number | null>(null)
+async function revokeInvite(id: number) {
+  await $fetch(`/api/admin/invites/${id}`, { method: 'DELETE' })
+  confirmRevoke.value = null
+  if (newInvite.value?.id === id) newInvite.value = null
+  if (renewedLink.value?.id === id) renewedLink.value = null
+  await refreshInvites()
 }
 
 const confirmRemove = ref<number | null>(null)
@@ -61,77 +103,149 @@ async function changePassword() {
     </p>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-      <ul class="divide-y divide-line self-start bg-white shadow-sm">
-        <li
-          v-for="admin in admins"
-          :key="admin.id"
-          class="flex flex-wrap items-center gap-3 px-5 py-4"
-        >
-          <div class="min-w-0 flex-1">
-            <p class="font-bold">
-              {{ admin.name || admin.email }}
-              <span v-if="admin.id === user?.id" class="ml-1 text-xs font-normal text-muted"
-                >(jij)</span
+      <div class="space-y-6 self-start">
+        <ul class="divide-y divide-line bg-white shadow-sm">
+          <li
+            v-for="admin in admins"
+            :key="admin.id"
+            class="flex flex-wrap items-center gap-3 px-5 py-4"
+          >
+            <div class="min-w-0 flex-1">
+              <p class="font-bold">
+                {{ admin.name || admin.email }}
+                <span v-if="admin.id === user?.id" class="ml-1 text-xs font-normal text-muted"
+                  >(jij)</span
+                >
+              </p>
+              <p v-if="admin.name" class="truncate text-sm text-muted">{{ admin.email }}</p>
+            </div>
+            <template v-if="admin.id !== user?.id">
+              <div v-if="confirmRemove === admin.id" class="flex gap-2">
+                <button type="button" class="btn-primary min-h-9 text-sm" @click="remove(admin.id)">
+                  Verwijderen
+                </button>
+                <button
+                  type="button"
+                  class="btn-ghost min-h-9 text-sm"
+                  @click="confirmRemove = null"
+                >
+                  Annuleren
+                </button>
+              </div>
+              <button
+                v-else
+                type="button"
+                class="btn-ghost min-h-9 text-sm"
+                @click="confirmRemove = admin.id"
               >
-            </p>
-            <p v-if="admin.name" class="truncate text-sm text-muted">{{ admin.email }}</p>
-          </div>
-          <template v-if="admin.id !== user?.id">
-            <div v-if="confirmRemove === admin.id" class="flex gap-2">
-              <button type="button" class="btn-primary min-h-9 text-sm" @click="remove(admin.id)">
                 Verwijderen
               </button>
-              <button type="button" class="btn-ghost min-h-9 text-sm" @click="confirmRemove = null">
-                Annuleren
-              </button>
-            </div>
-            <button
-              v-else
-              type="button"
-              class="btn-ghost min-h-9 text-sm"
-              @click="confirmRemove = admin.id"
-            >
-              Verwijderen
-            </button>
-          </template>
-        </li>
-      </ul>
+            </template>
+          </li>
+        </ul>
+
+        <section v-if="invites.length" aria-labelledby="invites-title">
+          <h2 id="invites-title" class="mb-2 text-2xl">Uitnodigingen</h2>
+          <ul class="divide-y divide-line bg-white shadow-sm">
+            <li v-for="item in invites" :key="item.id" class="px-5 py-4">
+              <div class="flex flex-wrap items-center gap-3">
+                <div class="min-w-0 flex-1">
+                  <p class="font-bold">
+                    {{ item.name || 'Zonder naam' }}
+                    <span
+                      v-if="item.expired"
+                      class="ml-1 bg-paper px-1.5 py-0.5 text-xs font-normal text-muted"
+                      >Verlopen</span
+                    >
+                  </p>
+                  <p class="text-sm text-muted">
+                    <template v-if="item.expired">Verlopen op</template>
+                    <template v-else>Geldig tot</template>
+                    {{ formatDateTime(item.expiresAt) }}
+                    <template v-if="item.createdBy">
+                      · uitgenodigd door {{ item.createdBy }}</template
+                    >
+                  </p>
+                </div>
+                <div v-if="confirmRevoke === item.id" class="flex gap-2">
+                  <button
+                    type="button"
+                    class="btn-primary min-h-9 text-sm"
+                    @click="revokeInvite(item.id)"
+                  >
+                    Intrekken
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-ghost min-h-9 text-sm"
+                    @click="confirmRevoke = null"
+                  >
+                    Annuleren
+                  </button>
+                </div>
+                <div v-else class="flex gap-2">
+                  <button
+                    type="button"
+                    class="btn-ghost min-h-9 text-sm"
+                    @click="renewInvite(item.id)"
+                  >
+                    Nieuwe link
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-ghost min-h-9 text-sm"
+                    @click="confirmRevoke = item.id"
+                  >
+                    Intrekken
+                  </button>
+                </div>
+              </div>
+              <div v-if="renewedLink?.id === item.id" class="mt-3" role="status">
+                <p class="mb-2 text-sm">De oude link werkt niet meer. Stuur deze nieuwe link:</p>
+                <InviteLink
+                  :token="renewedLink.token"
+                  :name="item.name"
+                  :expires-at="renewedLink.expiresAt"
+                />
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
 
       <div class="space-y-6">
-        <form class="space-y-4 bg-white p-5 shadow-sm" @submit.prevent="add">
-          <h2 class="text-2xl">Beheerder toevoegen</h2>
+        <form class="space-y-4 bg-white p-5 shadow-sm" @submit.prevent="invite">
+          <h2 class="text-2xl">Beheerder uitnodigen</h2>
+          <p class="text-sm text-muted">
+            Maak een persoonlijke link die je kunt mailen of delen via bijvoorbeeld Signal. De
+            nieuwe beheerder vult zelf naam, e-mailadres en wachtwoord in. De link is een week
+            geldig.
+          </p>
           <div>
-            <label for="admin-name" class="mb-1 block text-sm font-bold">Naam</label>
-            <input id="admin-name" v-model="newAdmin.name" class="input py-2" autocomplete="off" />
-          </div>
-          <div>
-            <label for="admin-email" class="mb-1 block text-sm font-bold">E-mailadres</label>
-            <input
-              id="admin-email"
-              v-model="newAdmin.email"
-              type="email"
-              class="input py-2"
-              autocomplete="off"
-              required
-            />
-          </div>
-          <div>
-            <label for="admin-password" class="mb-1 block text-sm font-bold"
-              >Wachtwoord (min. 10 tekens)</label
+            <label for="invite-name" class="mb-1 block text-sm font-bold"
+              >Naam
+              <span class="font-normal text-muted">(optioneel, wordt voor-ingevuld)</span></label
             >
             <input
-              id="admin-password"
-              v-model="newAdmin.password"
-              type="password"
+              id="invite-name"
+              v-model="inviteName"
               class="input py-2"
-              autocomplete="new-password"
-              minlength="10"
-              required
+              autocomplete="off"
+              maxlength="60"
             />
           </div>
-          <p v-if="addError" class="text-sm text-red-dark" role="alert">{{ addError }}</p>
-          <p v-if="addSuccess" class="text-sm text-green" role="status">{{ addSuccess }}</p>
-          <button type="submit" class="btn-primary w-full">Toevoegen</button>
+          <p v-if="inviteError" class="text-sm text-red-dark" role="alert">{{ inviteError }}</p>
+          <button type="submit" class="btn-primary w-full">Uitnodigingslink maken</button>
+          <div v-if="newInvite" class="border-t border-line pt-4" role="status">
+            <p class="mb-2 text-sm font-bold">
+              Stuur deze link naar {{ newInvite.name || 'de nieuwe beheerder' }}:
+            </p>
+            <InviteLink
+              :token="newInvite.token"
+              :name="newInvite.name"
+              :expires-at="newInvite.expiresAt"
+            />
+          </div>
         </form>
 
         <form class="space-y-4 bg-white p-5 shadow-sm" @submit.prevent="changePassword">
