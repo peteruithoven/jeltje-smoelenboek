@@ -32,6 +32,17 @@ const MIGRATIONS: string[] = [
     created_at TEXT NOT NULL
   );
   `,
+  // 2: uitnodigingen voor nieuwe beheerders (alleen de hash van het token)
+  `
+  CREATE TABLE admin_invites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_hash TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL DEFAULT '',
+    created_by INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+  );
+  `,
 ]
 
 export function openDatabase(dataDir: string): DatabaseSync {

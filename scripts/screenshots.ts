@@ -29,6 +29,13 @@ const ADMIN = {
   password: randomBytes(12).toString('hex'),
 }
 
+// Extra beheerders en uitnodigingen voor het scherm Beheerders (verzonnen namen)
+const EXTRA_ADMINS = [
+  ['joyce@example.nl', 'Joyce van Dam'],
+  ['mehmet@example.nl', 'Mehmet Kaya'],
+] as const
+const INVITES = ['Pieter Smit', 'Fatima El Amrani'] as const
+
 interface Avatar {
   background: string
   skin: string
@@ -416,6 +423,57 @@ try {
   database.close()
   await open(page, '/beheer', { ...DESKTOP, height: 1250 })
   await save(page, 'beheer-desktop', false)
+
+  // Beheerders: extra beheerders en twee openstaande uitnodigingen
+  const adminsDb = openDatabase(tmp)
+  for (const [email, name] of EXTRA_ADMINS) {
+    adminsDb
+      .prepare('INSERT INTO admins (email, name, password_hash, created_at) VALUES (?, ?, ?, ?)')
+      .run(
+        email,
+        name,
+        await hashPassword(randomBytes(12).toString('hex')),
+        new Date().toISOString(),
+      )
+  }
+  adminsDb.close()
+  await page.evaluate(async (name) => {
+    await fetch('/api/admin/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    })
+  }, INVITES[0])
+  await open(page, '/beheer/beheerders', DESKTOP)
+  await page.locator('#invite-name').fill(INVITES[1])
+  await page.locator('button::-p-text(Uitnodigingslink maken)').click()
+  await page.waitForSelector('input[aria-label=Uitnodigingslink]')
+  const inviteUrl = await page.$eval(
+    'input[aria-label=Uitnodigingslink]',
+    (input) => (input as HTMLInputElement).value,
+  )
+  await page.evaluate(
+    (from, to) => {
+      for (const input of document.querySelectorAll<HTMLInputElement>('input[readonly]')) {
+        input.value = input.value.replace(from, to)
+      }
+      ;(document.activeElement as HTMLElement | null)?.blur()
+    },
+    BASE_URL,
+    PUBLIC_URL,
+  )
+  await settle(300)
+  await save(page, 'beheerders-desktop')
+
+  // Uitnodiging openen als de nieuwe beheerder (niet ingelogd)
+  const guestContext = await browser.createBrowserContext()
+  const guest = await guestContext.newPage()
+  await open(guest, new URL(inviteUrl).pathname, PHONE)
+  await guest.locator('#email').fill('fatima@example.nl')
+  await guest.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  await settle(300)
+  await save(guest, 'uitnodiging-mobiel')
+  await guestContext.close()
 
   // Eerste pagina van de PDF
   const pdf = await page.evaluate(async () => {

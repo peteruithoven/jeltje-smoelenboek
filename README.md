@@ -28,12 +28,22 @@ smoelenboek, en waarmee beheerders het smoelenboek als PDF downloaden.
 - Nieuwe bewerklink maken voor iemand die de eigen link kwijt is (de oude link vervalt)
 - Personen verwijderen
 - **Download PDF**: het smoelenboek in A4-formaat, 9 personen per pagina, alleen zichtbare personen
-- Beheerders toevoegen/verwijderen en eigen wachtwoord wijzigen
+- Beheerders uitnodigen via een persoonlijke link (te mailen of te delen via bijv. Signal), een
+  week geldig en maar één keer te gebruiken; de nieuwe beheerder vult zelf naam, e-mailadres en
+  wachtwoord in. Overzicht van openstaande uitnodigingen, met nieuwe link maken of intrekken.
+- Beheerders verwijderen en eigen wachtwoord wijzigen
 
 <table>
   <tr>
     <td width="60%"><img src="docs/screenshots/beheer-desktop.webp" alt="Het beheeroverzicht met kaartjes per vrijwilliger, zichtbaarheidsschakelaars en de knop Download PDF" width="100%"></td>
     <td width="40%"><img src="docs/screenshots/pdf.webp" alt="De eerste pagina van het smoelenboek als PDF" width="100%"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="70%"><img src="docs/screenshots/beheerders-desktop.webp" alt="De pagina Beheerders met drie beheerders, twee openstaande uitnodigingen en een zojuist gemaakte uitnodigingslink" width="100%"></td>
+    <td width="30%"><img src="docs/screenshots/uitnodiging-mobiel.webp" alt="De uitnodigingspagina op een telefoon, met de voor-ingevulde naam" width="100%"></td>
   </tr>
 </table>
 
@@ -46,7 +56,8 @@ De voorbeeldpersonen in de screenshots zijn verzonnen en hebben getekende avatar
   inclusief de foto's. Backup = dat ene bestand kopiëren.
 - Beheerderssessies met [nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils), wachtwoorden
   gehasht met scrypt.
-- Bewerklinks: willekeurig token van 192 bits; in de database staat alleen de SHA-256-hash.
+- Bewerklinks en uitnodigingslinks: willekeurig token van 192 bits; in de database staat alleen de
+  SHA-256-hash.
 - PDF wordt op de server gemaakt met [PDFKit](https://pdfkit.org), met de huisstijlfonts Blogger
   Sans en ABeeZee.
 - Foto's worden in de browser verkleind en uitgesneden (vierkant, 800 px). Het verkleinde origineel
@@ -71,12 +82,13 @@ vp run screenshots                                   # screenshots in de README 
 (je eigen database blijft onaangeroerd), en gebruikt Google Chrome (`CHROME=...` voor een ander
 pad) en `pdftoppm` (pakket poppler-utils) voor de PDF-afbeelding.
 
-| Pagina               | Wat                      |
-| -------------------- | ------------------------ |
-| `/`                  | Aanmeldformulier         |
-| `/bewerken/<token>`  | Eigen gegevens aanpassen |
-| `/beheer`            | Beheer (login vereist)   |
-| `/beheer/beheerders` | Beheerders beheren       |
+| Pagina                 | Wat                                  |
+| ---------------------- | ------------------------------------ |
+| `/`                    | Aanmeldformulier                     |
+| `/bewerken/<token>`    | Eigen gegevens aanpassen             |
+| `/beheer`              | Beheer (login vereist)               |
+| `/beheer/beheerders`   | Beheerders beheren                   |
+| `/uitnodiging/<token>` | Uitnodiging als beheerder accepteren |
 
 ### Beheerders via de commandline
 
