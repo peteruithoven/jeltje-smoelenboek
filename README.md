@@ -40,6 +40,13 @@ smoelenboek, en waarmee beheerders het smoelenboek als PDF downloaden.
   </tr>
 </table>
 
+<table>
+  <tr>
+    <td width="70%"><img src="docs/screenshots/beheerders-desktop.webp" alt="De pagina Beheerders met drie beheerders, twee openstaande uitnodigingen en een zojuist gemaakte uitnodigingslink" width="100%"></td>
+    <td width="30%"><img src="docs/screenshots/uitnodiging-mobiel.webp" alt="De uitnodigingspagina op een telefoon, met de voor-ingevulde naam" width="100%"></td>
+  </tr>
+</table>
+
 De voorbeeldpersonen in de screenshots zijn verzonnen en hebben getekende avatars.
 
 ## Techniek
