@@ -177,3 +177,7 @@ Wisselt de server ooit van host key, pas dan `SSH_KNOWN_HOST` in de workflow aan
 `sqlite3 smoelenboek.sqlite ".backup kopie.sqlite"`.
 
 De database houdt de data buiten de code-map, zodat een nieuwe deploy nooit gegevens overschrijft.
+
+## Licentie
+
+[MIT](LICENSE)
