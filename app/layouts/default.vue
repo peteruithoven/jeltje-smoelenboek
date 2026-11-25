@@ -22,11 +22,16 @@
         class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-5 sm:px-6"
       >
         <span>Repair Café Jeltje · Buurtsalon Jeltje · Amsterdam Oud-West</span>
-        <a
-          href="https://repaircafejeltje.nl/"
-          class="underline-offset-2 hover:text-white hover:underline"
-          >repaircafejeltje.nl</a
-        >
+        <div class="flex items-center gap-4">
+          <a
+            href="https://repaircafejeltje.nl/"
+            class="underline-offset-2 hover:text-white hover:underline"
+            >repaircafejeltje.nl</a
+          >
+          <NuxtLink to="/beheer" class="underline-offset-2 hover:text-white hover:underline"
+            >Beheer</NuxtLink
+          >
+        </div>
       </div>
     </footer>
   </div>
