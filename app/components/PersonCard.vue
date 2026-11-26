@@ -42,7 +42,7 @@ const about = computed(() => props.person.about.trim())
     </div>
 
     <h3
-      class="label-tag mt-4 max-w-full text-2xl break-words transition-colors"
+      class="label-tag mt-4 max-w-full text-2xl font-bold break-words transition-colors"
       :class="{ 'opacity-60': !person.name.trim() }"
       :style="{ backgroundColor: color, rotate: `${tilt}deg` }"
     >

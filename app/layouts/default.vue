@@ -28,6 +28,9 @@
             class="underline-offset-2 hover:text-white hover:underline"
             >repaircafejeltje.nl</a
           >
+          <NuxtLink to="/privacy" class="underline-offset-2 hover:text-white hover:underline"
+            >Privacy</NuxtLink
+          >
           <NuxtLink to="/beheer" class="underline-offset-2 hover:text-white hover:underline"
             >Beheer</NuxtLink
           >

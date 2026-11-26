@@ -194,10 +194,17 @@ const roleClasses: Record<RoleColor, string> = {
           Ik geef toestemming dat mijn foto en bovenstaande gegevens gebruikt worden voor het
           smoelenboek van Repair Café Jeltje. Het smoelenboek wordt alleen gedeeld binnen ons Repair
           Café en wordt niet publiekelijk toegankelijk via een website. Ik kan mijn gegevens altijd
-          aanpassen of verwijderen via mijn persoonlijke link.
+          aanpassen of verwijderen via mijn persoonlijke link. Een smoelenboek dat al gedeeld of
+          geprint is, blijft wel bestaan.
         </span>
       </label>
       <p v-if="show('consent')" class="-mt-4 text-sm text-red-dark">{{ show('consent') }}</p>
+      <p class="-mt-4 text-sm text-muted">
+        Lees meer over
+        <NuxtLink to="/privacy" target="_blank" class="underline underline-offset-2 hover:text-ink"
+          >hoe we met je gegevens omgaan</NuxtLink
+        >.
+      </p>
 
       <p
         v-if="props.error"

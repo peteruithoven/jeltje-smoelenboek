@@ -5,16 +5,17 @@ export default defineEventHandler(async (event) => {
   const now = new Date().toISOString()
   const db = useDb()
 
+  // consent_at blijft het moment van de aanmelding: op de bewerkpagina staat het
+  // toestemmingsvinkje al aan, dus opslaan is geen nieuwe actieve toestemming.
   db.prepare(
     `UPDATE people SET name = ?, roles = ?, role_other = ?, repairs = ?, about = ?,
-      consent_at = ?, updated_at = ? WHERE id = ?`,
+      updated_at = ? WHERE id = ?`,
   ).run(
     input.name,
     JSON.stringify(input.roles),
     input.roleOther,
     input.repairs,
     input.about,
-    now,
     now,
     person.id,
   )
