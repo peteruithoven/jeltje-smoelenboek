@@ -117,14 +117,20 @@ const roleClasses: Record<RoleColor, string> = {
 
       <section v-if="form.roles.includes('reparateur')">
         <label for="repairs" class="field-label">Wat repareer je graag?</label>
+        <p class="field-hint">
+          Houd het kort, bijvoorbeeld kleding, elektrische apparaten of messen.
+        </p>
         <input
           id="repairs"
           v-model="form.repairs"
           class="input"
-          placeholder="Bijv. naaimachines, lampen en kleine elektronica"
+          placeholder="Bijv. fietsen en naaimachines"
           :maxlength="LIMITS.repairs"
         />
-        <p class="mt-1 text-right text-xs text-muted">
+        <p
+          class="mt-1 text-right text-xs"
+          :class="length(form.repairs) >= LIMITS.repairs ? 'text-red-dark' : 'text-muted'"
+        >
           {{ length(form.repairs) }}/{{ LIMITS.repairs }}
         </p>
       </section>
