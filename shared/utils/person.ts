@@ -13,7 +13,7 @@ export type RoleColor = (typeof ROLES)[number]['color']
 export const LIMITS = {
   name: 60,
   roleOther: 40,
-  repairs: 100,
+  repairs: 50,
   about: 150,
 } as const
 
