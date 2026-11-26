@@ -51,13 +51,15 @@ const about = computed(() => props.person.about.trim())
 
     <p
       v-if="role"
-      class="mt-2.5 text-sm text-muted"
+      class="mt-2.5 text-sm text-ink"
       :class="{ 'italic opacity-60': !roleLabel(person) }"
     >
       {{ role }}
     </p>
     <p v-if="repairs" class="mt-1 text-sm text-green">Repareert graag: {{ repairs }}</p>
-    <p v-if="about" class="mt-2 text-sm leading-snug break-words italic">“{{ about }}”</p>
+    <p v-if="about" class="mt-2 text-sm leading-snug break-words text-muted italic">
+      “{{ about }}”
+    </p>
     <p v-else-if="placeholders" class="mt-2 text-sm italic text-muted/60">
       “Iets over jezelf in één zin.”
     </p>

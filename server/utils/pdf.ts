@@ -216,7 +216,7 @@ function drawCard(
 
   const role = clean(roleLabel(person))
   if (role) {
-    doc.font('body').fontSize(9).fillColor(GREY)
+    doc.font('body').fontSize(9).fillColor(COLORS.ink)
     doc.text(role, x, cursor, { width, align: 'center', height: 12, ellipsis: true })
     cursor += 13
   }
@@ -240,8 +240,6 @@ function drawCard(
     let size = 8.5
     doc.font('italic').fontSize(size)
     while (size > 6.5 && doc.heightOfString(text, options) > remaining) doc.fontSize((size -= 0.5))
-    doc
-      .fillColor(COLORS.ink)
-      .text(text, x + 4, cursor, { ...options, height: remaining, ellipsis: true })
+    doc.fillColor(GREY).text(text, x + 4, cursor, { ...options, height: remaining, ellipsis: true })
   }
 }
