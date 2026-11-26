@@ -33,8 +33,9 @@ async function asset(name: string): Promise<Buffer> {
 }
 
 export async function renderSmoelenboek(people: PdfPerson[]): Promise<Buffer> {
-  const [display, body, italic, logo] = await Promise.all([
+  const [display, displayBold, body, italic, logo] = await Promise.all([
     asset('fonts/BloggerSans.otf'),
+    asset('fonts/BloggerSans-Bold.ttf'),
     asset('fonts/ABeeZee-Regular.ttf'),
     asset('fonts/ABeeZee-Italic.ttf'),
     asset('img/logo.png'),
@@ -58,6 +59,13 @@ export async function renderSmoelenboek(people: PdfPerson[]): Promise<Buffer> {
     },
   })
   doc.registerFont('display', display)
+  doc.registerFont('display-bold', displayBold)
+  // De Bold-versie van Blogger Sans heeft ascent/descent 0 in de hhea-tabel (browsers gebruiken
+  // OS/2, pdfkit niet). Zonder correctie staat de tekst boven het label. Neem de waarden van de
+  // Regular over; het fontbestand zelf passen we niet aan (licentie CC BY-ND).
+  const bold = (doc.font('display-bold') as unknown as { _font: Record<string, number> })._font
+  bold.ascender = 760
+  bold.descender = -240
   doc.registerFont('body', body)
   doc.registerFont('italic', italic)
 
@@ -181,7 +189,7 @@ function drawCard(
   const name = clean(person.name)
   const maxTextWidth = width - 24
   let fontSize = 15
-  doc.font('display')
+  doc.font('display-bold')
   // Eerst iets kleiner maken; past het dan nog niet, dan over twee regels
   while (fontSize > 12 && doc.fontSize(fontSize).widthOfString(name) > maxTextWidth) fontSize -= 0.5
   const textOptions = { width: maxTextWidth, align: 'center' as const, lineGap: -1 }
