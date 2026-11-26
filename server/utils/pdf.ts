@@ -18,6 +18,30 @@ const PHOTO = 96
 const GREY = '#5f5d59'
 const LIGHT = '#f4f1ec'
 
+/** Volgorde en titels van de groepen in de PDF. Gastvrouw en gastheer zijn dezelfde rol. */
+const GROUPS: { title: string; roles: Role[] }[] = [
+  { title: 'Reparateurs', roles: ['reparateur'] },
+  { title: 'Gastvrouwen & gastheren', roles: ['gastvrouw', 'gastheer'] },
+  { title: 'Andere rollen', roles: ['anders'] },
+]
+const MULTIPLE_ROLES = 'Meerdere rollen'
+
+/** Deelt mensen in per groep; wie in meer dan één groep valt, komt bij "Meerdere rollen". */
+function groupByRole(people: PdfPerson[]) {
+  const groups = [...GROUPS.map((group) => group.title), MULTIPLE_ROLES].map((title) => ({
+    title,
+    people: [] as PdfPerson[],
+  }))
+  for (const person of people) {
+    const matches = GROUPS.filter((group) =>
+      group.roles.some((role) => person.roles.includes(role)),
+    )
+    const index = matches.length === 1 ? GROUPS.indexOf(matches[0]!) : GROUPS.length
+    groups[index]!.people.push(person)
+  }
+  return groups.filter((group) => group.people.length > 0)
+}
+
 /** Emoji e.d. zitten niet in de fonts; die laten we weg in de PDF. */
 function clean(text: string) {
   return text
@@ -73,21 +97,28 @@ export async function renderSmoelenboek(people: PdfPerson[]): Promise<Buffer> {
   doc.on('data', (chunk: Buffer) => chunks.push(chunk))
   const done = new Promise<Buffer>((resolve) => doc.on('end', () => resolve(Buffer.concat(chunks))))
 
+  // Elke groep begint op een nieuwe pagina
   const perPage = COLS * ROWS
-  const pageCount = Math.max(1, Math.ceil(people.length / perPage))
+  const pages = groupByRole(people).flatMap((group) =>
+    Array.from({ length: Math.ceil(group.people.length / perPage) }, (_, i) => ({
+      title: group.title,
+      people: group.people.slice(i * perPage, (i + 1) * perPage),
+    })),
+  )
+  if (pages.length === 0) pages.push({ title: 'Smoelenboek', people: [] })
+  const pageCount = pages.length
   const contentWidth = PAGE.width - MARGIN * 2
   const colWidth = (contentWidth - GAP_X * (COLS - 1)) / COLS
   const gridTop = MARGIN + HEADER_HEIGHT
   const gridHeight = PAGE.height - MARGIN - FOOTER_HEIGHT - gridTop
   const rowHeight = (gridHeight - GAP_Y * (ROWS - 1)) / ROWS
 
-  for (let page = 0; page < pageCount; page++) {
+  pages.forEach((page, pageIndex) => {
     doc.addPage()
-    drawHeader(doc, logo, date)
-    drawFooter(doc, page + 1, pageCount)
+    drawHeader(doc, logo, date, page.title)
+    drawFooter(doc, pageIndex + 1, pageCount)
 
-    const pagePeople = people.slice(page * perPage, (page + 1) * perPage)
-    pagePeople.forEach((person, index) => {
+    page.people.forEach((person, index) => {
       const col = index % COLS
       const row = Math.floor(index / COLS)
       drawCard(
@@ -110,13 +141,13 @@ export async function renderSmoelenboek(people: PdfPerson[]): Promise<Buffer> {
           align: 'center',
         })
     }
-  }
+  })
 
   doc.end()
   return done
 }
 
-function drawHeader(doc: PDFKit.PDFDocument, logo: Buffer, date: string) {
+function drawHeader(doc: PDFKit.PDFDocument, logo: Buffer, date: string, title: string) {
   const logoHeight = 44
   doc.image(logo, MARGIN, MARGIN - 4, { height: logoHeight })
 
@@ -125,12 +156,13 @@ function drawHeader(doc: PDFKit.PDFDocument, logo: Buffer, date: string) {
     .font('display')
     .fontSize(28)
     .fillColor(COLORS.ink)
-    .text('Smoelenboek', MARGIN, MARGIN - 2, { width: right - MARGIN, align: 'right' })
+    .text(title, MARGIN, MARGIN - 2, { width: right - MARGIN, align: 'right' })
+  const subtitle = title === 'Smoelenboek' ? 'Repair Café Jeltje' : 'Smoelenboek Repair Café Jeltje'
   doc
     .font('body')
     .fontSize(9)
     .fillColor(GREY)
-    .text(`Repair Café Jeltje · ${date}`, MARGIN, MARGIN + 28, {
+    .text(`${subtitle} · ${date}`, MARGIN, MARGIN + 28, {
       width: right - MARGIN,
       align: 'right',
     })
