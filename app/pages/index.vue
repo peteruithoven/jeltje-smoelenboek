@@ -64,8 +64,9 @@ async function submit() {
           te staan.
         </p>
         <p class="mt-3 text-sm text-muted">
-          Het smoelenboek wordt alleen gedeeld binnen ons Repair Café. Na het opslaan krijg je een
-          persoonlijke link waarmee je alles later kunt aanpassen of verwijderen.
+          Het smoelenboek wordt alleen gedeeld binnen ons Repair Café en wordt niet publiekelijk
+          toegankelijk via een website. Na het opslaan krijg je een persoonlijke link waarmee je
+          alles later kunt aanpassen of verwijderen.
         </p>
       </div>
 

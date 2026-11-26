@@ -187,7 +187,8 @@ const roleClasses: Record<RoleColor, string> = {
         <span class="text-sm leading-relaxed">
           Ik geef toestemming dat mijn foto en bovenstaande gegevens gebruikt worden voor het
           smoelenboek van Repair Café Jeltje. Het smoelenboek wordt alleen gedeeld binnen ons Repair
-          Café. Ik kan mijn gegevens altijd aanpassen of verwijderen via mijn persoonlijke link.
+          Café en wordt niet publiekelijk toegankelijk via een website. Ik kan mijn gegevens altijd
+          aanpassen of verwijderen via mijn persoonlijke link.
         </span>
       </label>
       <p v-if="show('consent')" class="-mt-4 text-sm text-red-dark">{{ show('consent') }}</p>
