@@ -1,7 +1,5 @@
 <script setup lang="ts">
 useHead({ title: 'Privacy' })
-
-const CONTACT = 'peter@peteruithoven.nl'
 </script>
 
 <template>
@@ -18,9 +16,9 @@ const CONTACT = 'peter@peteruithoven.nl'
       <section>
         <h2 class="mb-2 text-2xl">Wie is verantwoordelijk?</h2>
         <p>
-          Peter Uithoven, vrijwilliger bij Repair Café Jeltje, beheert het smoelenboek. Vragen of
-          verzoeken over je gegevens kun je mailen naar
-          <a :href="`mailto:${CONTACT}`">{{ CONTACT }}</a
+          {{ CONTACT_NAME }}, vrijwilliger bij Repair Café Jeltje, beheert het smoelenboek. Vragen
+          of verzoeken over je gegevens kun je mailen naar
+          <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a
           >.
         </p>
       </section>
@@ -40,10 +38,11 @@ const CONTACT = 'peter@peteruithoven.nl'
         <h2 class="mb-2 text-2xl">Waarvoor en voor wie?</h2>
         <p>
           Alleen voor het smoelenboek, zodat vrijwilligers elkaar beter leren kennen. We gebruiken
-          je gegevens omdat je daar toestemming voor geeft. De coördinatoren van het Repair Café
-          zien alle aanmeldingen en maken er een PDF van. Die delen we alleen met de vrijwilligers
-          van Repair Café Jeltje, digitaal of geprint. Het smoelenboek staat niet op een openbare
-          website en zoekmachines vinden deze site niet.
+          je gegevens omdat je daar toestemming voor geeft. Beheerders zien alle aanmeldingen en
+          kunnen het smoelenboek als PDF downloaden. Naast Peter zijn dat soms een paar andere
+          vrijwilligers van het Repair Café, bijvoorbeeld wie het smoelenboek wil printen. De PDF
+          delen we alleen met de vrijwilligers van Repair Café Jeltje, digitaal of geprint. Het
+          smoelenboek staat niet op een openbare website en zoekmachines vinden deze site niet.
         </p>
       </section>
 
@@ -59,8 +58,8 @@ const CONTACT = 'peter@peteruithoven.nl'
         <h2 class="mb-2 text-2xl">Hoe lang?</h2>
         <p>
           Zolang je in het smoelenboek staat. Stop je als vrijwilliger, verwijder jezelf dan via je
-          persoonlijke link of laat het ons weten. Ook de coördinatoren kunnen je verwijderen als ze
-          weten dat je gestopt bent.
+          persoonlijke link of laat het Peter weten. Ook een beheerder kan je verwijderen als die
+          weet dat je gestopt bent.
         </p>
       </section>
 
@@ -77,10 +76,9 @@ const CONTACT = 'peter@peteruithoven.nl'
         <h2 class="mb-2 text-2xl">Je rechten</h2>
         <p>
           Je kunt je gegevens altijd inzien, aanpassen of verwijderen via je persoonlijke link. Ben
-          je die kwijt? Vraag dan een coördinator om een nieuwe link, of mail
-          <a :href="`mailto:${CONTACT}`">{{ CONTACT }}</a
-          >. Ben je het niet eens met hoe we met je gegevens omgaan, dan kun je een klacht indienen
-          bij de
+          je die kwijt? Mail dan naar
+          <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a> voor een nieuwe link. Ben je
+          het niet eens met hoe we met je gegevens omgaan, dan kun je een klacht indienen bij de
           <a href="https://autoriteitpersoonsgegevens.nl/" target="_blank" rel="noopener"
             >Autoriteit Persoonsgegevens</a
           >.
