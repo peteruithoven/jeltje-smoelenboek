@@ -43,6 +43,11 @@ const MIGRATIONS: string[] = [
     expires_at TEXT NOT NULL
   );
   `,
+  // 3: consent_at werd bij elke bewerking overschreven. Toestemming was bij de aanmelding
+  // verplicht, dus het oorspronkelijke moment is created_at.
+  `
+  UPDATE people SET consent_at = created_at;
+  `,
 ]
 
 export function openDatabase(dataDir: string): DatabaseSync {

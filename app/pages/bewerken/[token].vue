@@ -98,8 +98,11 @@ async function remove() {
         voor je aangemaakt.
       </p>
       <p class="mt-3 text-muted">
-        Ben je je link kwijt? Vraag dan een van de coördinatoren van het Repair Café om een nieuwe
-        link.
+        Ben je je link kwijt? Mail dan naar
+        <a :href="`mailto:${CONTACT_EMAIL}`" class="underline underline-offset-2">{{
+          CONTACT_EMAIL
+        }}</a>
+        voor een nieuwe link.
       </p>
       <NuxtLink to="/" class="btn-secondary mt-8">Naar het aanmeldformulier</NuxtLink>
     </div>
@@ -112,8 +115,11 @@ async function remove() {
         </h1>
         <p class="mt-6 text-lg">Pas hieronder je gegevens of foto aan en klik op opslaan.</p>
         <p v-if="!person.visible" class="mt-4 border-l-4 border-blue bg-blue/10 p-3 text-sm">
-          Je staat op dit moment niet zichtbaar in het smoelenboek. Vragen? Neem contact op met een
-          van de coördinatoren.
+          Je staat op dit moment niet zichtbaar in het smoelenboek. Vragen? Mail naar
+          <a :href="`mailto:${CONTACT_EMAIL}`" class="underline underline-offset-2">{{
+            CONTACT_EMAIL
+          }}</a
+          >.
         </p>
       </div>
 
